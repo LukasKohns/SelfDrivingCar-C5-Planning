@@ -74,10 +74,20 @@ double BehaviorPlannerFSM::get_look_ahead_distance(const State& ego_state) {
   auto velocity_mag = utils::magnitude(ego_state.velocity);
   auto accel_mag = utils::magnitude(ego_state.acceleration);
 
-  // TODO-Lookahead: One way to find a reasonable lookahead distance is to find
+  // DONE -Lookahead: One way to find a reasonable lookahead distance is to find
   // the distance you will need to come to a stop while traveling at speed V and
   // using a comfortable deceleration.
-  auto look_ahead_distance = 1.0;  // <- Fix This
+
+  // NOTE: Going by the description I would have used CONFORT_ACCUM_LON_ACC_IN_ONE_SEC but then accel_mag which was
+  // given would have been unused so I'll assume I'm supposed to use that as the "comfortable deceleration"
+  // For the reaction time I'll take P_REACTION_TIME 0.25 (planning_params.h)
+
+  // Distance to standstill = reaction distance + braking distance
+  // braking distance = average velocity * braking time
+  // velocity - (braking_time * acceleration) = 0 (normally you would assume the accel to be negative and added but
+  //                                              here a magnitude is used which I assume to be positive by definition)
+  // => braking time = velocity / acceleration 
+  auto look_ahead_distance = (P_REACTION_TIME * velocity_mag) + (0.5 * velocity_mag * (velocity_mag / accel_mag));  // <- Fix This
 
   // LOG(INFO) << "Calculated look_ahead_distance: " << look_ahead_distance;
 
